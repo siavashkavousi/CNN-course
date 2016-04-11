@@ -59,29 +59,21 @@ def svm_loss_vectorized(W, X, y, reg):
 
     Inputs and outputs are the same as svm_loss_naive.
     """
-    loss = 0.0
     num_train = X.shape[0]
-    num_classes = W.shape[1]
-    dW = np.zeros(W.shape)  # initialize the gradient as zero
-    margins = np.zeros((num_train, num_classes))
     delta = 1.0
 
     # Calculate loss function
     scores = X.dot(W)
 
-    for i in xrange(num_train):
-        margins[i] = np.maximum(0, scores[i] - scores[i, y[i]] + delta)
-        margins[i, y[i]] = 0
+    correct_class_scores = np.choose(y, scores.T)
+    margins = np.maximum(0, scores.T - correct_class_scores + delta)
     loss = np.sum(margins)
 
     # Calculate gradient
     weight = np.array((margins > 0).astype(int))
-    w_yi = -np.sum(weight, axis=1)
-    for i in xrange(num_train):
-        weight[i, y[i]] = w_yi[i]
-
-    for i in xrange(num_train):
-        dW += X[i].reshape(-1, 1).dot(weight[i].reshape(-1, 1).T)
+    w_yi = -np.sum(weight, axis=0)
+    weight[y, range(num_train)] = w_yi
+    dW = weight.dot(X).T
 
     # Right now the loss is a sum over all training examples, but we want it
     # to be an average instead so we divide by num_train.
