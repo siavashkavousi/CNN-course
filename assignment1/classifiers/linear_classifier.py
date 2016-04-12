@@ -85,25 +85,13 @@ class LinearClassifier(object):
         - loss as a single float
         - gradient with respect to self.W; an array of the same shape as W
         """
-        num_train, dim = X_batch.shape
-        loss = -1 / num_train * sum(np.dot(np.matrix.transpose(np.log(sigmoid(np.dot(X_batch, self.W)))), y_batch) +
-                                    np.dot(np.matrix.transpose(np.log(1 - sigmoid(np.dot(X_batch, self.W)))), np.subtract(1, y_batch)))
-        reg_val = reg * (1 / 2 * num_train) * sum(sum(np.power(self.W, 2)))
-        reg_loss = loss + reg_val
-
-        grad = 1 / num_train * np.matrix.transpose(X_batch) \
-            .dot(np.matrix.transpose(np.matrix.transpose(sigmoid(np.dot(X_batch, self.W))) - y_batch))
-        reg_val = reg / num_train * self.W
-        reg_grad = grad + reg_val
-
-        return reg_loss, reg_grad
+        pass
 
 
 class LinearSVM(LinearClassifier):
     """ A subclass that uses the Multiclass SVM loss function """
 
     def loss(self, X_batch, y_batch, reg):
-        # return svm_loss_naive(self.W, X_batch, y_batch, reg)
         return svm_loss_vectorized(self.W, X_batch, y_batch, reg)
 
 
@@ -111,4 +99,5 @@ class Softmax(LinearClassifier):
     """ A subclass that uses the Softmax + Cross-entropy loss function """
 
     def loss(self, X_batch, y_batch, reg):
-        return softmax_loss_vectorized(self.W, X_batch, y_batch, reg)
+        return softmax_loss_naive(self.W, X_batch, y_batch, reg)
+        # return softmax_loss_vectorized(self.W, X_batch, y_batch, reg)
