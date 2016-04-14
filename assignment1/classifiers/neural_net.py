@@ -72,8 +72,8 @@ class TwoLayerNet(object):
         # Compute the forward pass
         dot1 = X.dot(W1) + b1
         h1 = relu(dot1)
-
-        scores = h1.dot(W2) + b2
+        dot2 = h1.dot(W2) + b2
+        scores = dot2
 
         # If the targets are not given then jump out, we're done
         if y is None:
@@ -85,10 +85,9 @@ class TwoLayerNet(object):
 
         p = np.divide(np.exp(scores.T), np.sum(np.exp(scores), axis=1))
         p = p.T
-        loss -= np.sum(np.log(p[range(num_train), y]))
 
+        loss -= np.sum(np.log(p[range(num_train), y]))
         loss /= num_train
-        # Add regularization to the loss.
         loss += 0.5 * reg * (np.sum(W1 * W1) + np.sum(W2 * W2))
 
         # Backward pass: compute gradients
@@ -98,7 +97,6 @@ class TwoLayerNet(object):
         dscores[range(num_train), y] -= 1
 
         grads['b2'] = np.mean(dscores, axis=0)
-
         dscores = dscores/num_train
         grads['W2'] = h1.T.dot(dscores) + reg * W2
 
@@ -107,7 +105,6 @@ class TwoLayerNet(object):
         dot1[dot1 < 0] = 0
         ddot1 = dot1 * dh1
         grads['b1'] = np.sum(ddot1, axis=0)
-
         grads['W1'] = X.T.dot(ddot1) + reg * W1
 
         return loss, grads
