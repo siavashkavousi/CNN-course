@@ -70,11 +70,10 @@ class TwoLayerNet(object):
         relu = lambda x: np.maximum(0, x)
 
         # Compute the forward pass
-        z2 = X.dot(W1) + b1
-        a2 = relu(z2)
+        dot1 = X.dot(W1) + b1
+        h1 = relu(dot1)
 
-        z3 = a2.dot(W2) + b2
-        scores = relu(z3)
+        scores = h1.dot(W2) + b2
 
         # If the targets are not given then jump out, we're done
         if y is None:
@@ -94,15 +93,22 @@ class TwoLayerNet(object):
 
         # Backward pass: compute gradients
         grads = {}
-        #############################################################################
-        # TODO: Compute the backward pass, computing the derivatives of the weights #
-        # and biases. Store the results in the grads dictionary. For example,       #
-        # grads['W1'] should store the gradient on W1, and be a matrix of same size #
-        #############################################################################
-        pass
-        #############################################################################
-        #                              END OF YOUR CODE                             #
-        #############################################################################
+
+        dscores = scores
+        dscores[range(num_train), y] -= 1
+
+        grads['b2'] = np.mean(dscores, axis=0)
+
+        dscores = dscores/num_train
+        grads['W2'] = h1.T.dot(dscores) + reg * W2
+
+        dh1 = dscores.dot(W2.T)
+        dot1[dot1 > 0] = 1
+        dot1[dot1 < 0] = 0
+        ddot1 = dot1 * dh1
+        grads['b1'] = np.sum(ddot1, axis=0)
+
+        grads['W1'] = X.T.dot(ddot1) + reg * W1
 
         return loss, grads
 
