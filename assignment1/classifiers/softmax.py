@@ -55,11 +55,10 @@ def softmax_loss_vectorized(W, X, y, reg):
     """
     # Initialize the loss and gradient to zero.
     loss = 0.0
-    dW = np.zeros_like(W)
     num_train, num_dim = X.shape
 
     scores = X.dot(W)
-    scores -= np.max(scores)
+    scores -= np.max(scores, axis=1).reshape(num_train, 1)
 
     p = np.divide(np.exp(scores.T), np.sum(np.exp(scores), axis=1))
     p = p.T
