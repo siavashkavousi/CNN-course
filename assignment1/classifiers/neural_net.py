@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+relu = lambda x: np.maximum(0, x)
+
 
 class TwoLayerNet(object):
     """
@@ -67,8 +69,6 @@ class TwoLayerNet(object):
         W2, b2 = self.params['W2'], self.params['b2']
         num_train, dim = X.shape
 
-        relu = lambda x: np.maximum(0, x)
-
         # Compute the forward pass
         dot1 = X.dot(W1) + b1
         h1 = relu(dot1)
@@ -97,7 +97,7 @@ class TwoLayerNet(object):
         dscores[range(num_train), y] -= 1
 
         grads['b2'] = np.mean(dscores, axis=0)
-        dscores = dscores/num_train
+        dscores = dscores / num_train
         grads['W2'] = h1.T.dot(dscores) + reg * W2
 
         dh1 = dscores.dot(W2.T)
@@ -139,32 +139,18 @@ class TwoLayerNet(object):
         val_acc_history = []
 
         for it in xrange(num_iters):
-            X_batch = None
-            y_batch = None
-
-            #########################################################################
-            # TODO: Create a random minibatch of training data and labels, storing  #
-            # them in X_batch and y_batch respectively.                             #
-            #########################################################################
-            pass
-            #########################################################################
-            #                             END OF YOUR CODE                          #
-            #########################################################################
+            indices = np.random.choice(num_train, batch_size)
+            X_batch = X[indices]
+            y_batch = y[indices]
 
             # Compute loss and gradients using the current minibatch
             loss, grads = self.loss(X_batch, y=y_batch, reg=reg)
             loss_history.append(loss)
 
-            #########################################################################
-            # TODO: Use the gradients in the grads dictionary to update the         #
-            # parameters of the network (stored in the dictionary self.params)      #
-            # using stochastic gradient descent. You'll need to use the gradients   #
-            # stored in the grads dictionary defined above.                         #
-            #########################################################################
-            pass
-            #########################################################################
-            #                             END OF YOUR CODE                          #
-            #########################################################################
+            self.params['b1'] -= learning_rate * grads['b1']
+            self.params['W1'] -= learning_rate * grads['W1']
+            self.params['b2'] -= learning_rate * grads['b2']
+            self.params['W2'] -= learning_rate * grads['W2']
 
             if verbose and it % 100 == 0:
                 print 'iteration %d / %d: loss %f' % (it, num_iters, loss)
