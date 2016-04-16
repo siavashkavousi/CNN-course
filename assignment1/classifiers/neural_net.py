@@ -187,14 +187,15 @@ class TwoLayerNet(object):
           the elements of X. For all i, y_pred[i] = c means that X[i] is predicted
           to have class c, where 0 <= c < C.
         """
-        y_pred = None
+        W1, b1 = self.params['W1'], self.params['b1']
+        W2, b2 = self.params['W2'], self.params['b2']
 
-        ###########################################################################
-        # TODO: Implement this function; it should be VERY simple!                #
-        ###########################################################################
-        pass
-        ###########################################################################
-        #                              END OF YOUR CODE                           #
-        ###########################################################################
+        # print X.dot(self.params['W1']).shape
+        dot1 = X.dot(W1) + b1
+        h1 = relu(dot1)
+        dot2 = h1.dot(W2) + b2
+        scores = dot2
+
+        y_pred = np.argmax(scores, 1)
 
         return y_pred
