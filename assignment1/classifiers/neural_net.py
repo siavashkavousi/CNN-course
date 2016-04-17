@@ -70,30 +70,28 @@ class TwoLayerNet(object):
         num_train, dim = X.shape
 
         # Compute the forward pass
-        dot1 = X.dot(W1) + b1
+        dot1 = X.dot(W1) + b1.T
         h1 = relu(dot1)
-        dot2 = h1.dot(W2) + b2
+        dot2 = h1.dot(W2) + b2.T
         scores = dot2
 
         # If the targets are not given then jump out, we're done
         if y is None:
             return scores
-
         # Compute the loss
-        loss = 0.0
         scores -= np.max(scores, axis=1).reshape(num_train, 1)
 
-        p = np.divide(np.exp(scores.T), np.sum(np.exp(scores), axis=1))
-        p = p.T
-
-        loss -= np.sum(np.log(p[range(num_train), y]))
+        p = np.exp(scores) / np.sum(np.exp(scores), axis=1).reshape(num_train, 1)
+        loss = -np.sum(np.log(p[range(num_train), y]))
         loss /= num_train
         loss += 0.5 * reg * (np.sum(W1 * W1) + np.sum(W2 * W2))
 
         # Backward pass: compute gradients
         grads = {}
 
-        dscores = scores
+
+
+        dscores = p
         dscores[range(num_train), y] -= 1
 
         grads['b2'] = np.mean(dscores, axis=0)
@@ -190,10 +188,9 @@ class TwoLayerNet(object):
         W1, b1 = self.params['W1'], self.params['b1']
         W2, b2 = self.params['W2'], self.params['b2']
 
-        # print X.dot(self.params['W1']).shape
-        dot1 = X.dot(W1) + b1
+        dot1 = X.dot(W1) + b1.T
         h1 = relu(dot1)
-        dot2 = h1.dot(W2) + b2
+        dot2 = h1.dot(W2) + b2.T
         scores = dot2
 
         y_pred = np.argmax(scores, 1)
