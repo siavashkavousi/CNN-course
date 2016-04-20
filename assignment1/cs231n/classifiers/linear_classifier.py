@@ -1,5 +1,6 @@
 from classifiers.linear_svm import *
-from classifiers.softmax import *
+
+from cs231n.classifiers.softmax import *
 
 
 def sigmoid(x):
