@@ -1,4 +1,4 @@
-from classifiers.linear_svm import *
+from cs231n.classifiers.linear_svm import *
 
 from cs231n.classifiers.softmax import *
 
