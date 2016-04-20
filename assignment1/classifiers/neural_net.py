@@ -79,17 +79,15 @@ class TwoLayerNet(object):
         if y is None:
             return scores
         # Compute the loss
-        scores -= np.max(scores, axis=1).reshape(num_train, 1)
+        scores -= np.max(scores, axis=1, keepdims=True)
 
-        p = np.exp(scores) / np.sum(np.exp(scores), axis=1).reshape(num_train, 1)
+        p = np.exp(scores) / np.sum(np.exp(scores), axis=1, keepdims=True)
         loss = -np.sum(np.log(p[range(num_train), y]))
         loss /= num_train
         loss += 0.5 * reg * (np.sum(W1 * W1) + np.sum(W2 * W2))
 
         # Backward pass: compute gradients
         grads = {}
-
-
 
         dscores = p
         dscores[range(num_train), y] -= 1
