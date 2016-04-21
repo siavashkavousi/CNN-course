@@ -2,4 +2,5 @@
 *.pdf
 *.pyc
 /assignment1/.idea
+/assignment1/.ipynb_checkpoints
 /assignment2/.idea
