@@ -19,9 +19,7 @@ def affine_forward(x, w, b):
     - out: output, of shape (N, M)
     - cache: (x, w, b)
     """
-    input_dims = x.shape
-    d = w.shape[0]
-    out = x.reshape(input_dims[0], d).dot(w)
+    out = x.reshape(x.shape[0], np.prod(x.shape[1:])).dot(w)
     out += b.T
 
     cache = (x, w, b)
@@ -44,14 +42,11 @@ def affine_backward(dout, cache):
     - db: Gradient with respect to b, of shape (M,)
     """
     x, w, b = cache
-    dx, dw, db = None, None, None
-    #############################################################################
-    # TODO: Implement the affine backward pass.                                 #
-    #############################################################################
-    pass
-    #############################################################################
-    #                             END OF YOUR CODE                              #
-    #############################################################################
+
+    dx = dout.dot(w.T).reshape(x.shape)
+    dw = x.reshape(x.shape[0], np.prod(x.shape[1:])).T.dot(dout)
+    db = np.sum(dout, axis=0, keepdims=True)
+
     return dx, dw, db
 
 
