@@ -242,16 +242,16 @@ class FullyConnectedNet(object):
             if idx == num_layers:
                 dh, dw, db = affine_backward(dout, dcache)
                 hidden['dh' + str(idx - 1)] = dh
-                hidden['dw' + str(idx)] = dw
+                hidden['dW' + str(idx)] = dw
                 hidden['db' + str(idx)] = db
             else:
                 dh, dw, db = affine_relu_backward(dout, dcache)
                 hidden['dh' + str(idx - 1)] = dh
-                hidden['dw' + str(idx)] = dw
+                hidden['dW' + str(idx)] = dw
                 hidden['db' + str(idx)] = db
 
         for i in range(1, self.num_layers):
-            hidden['dw' + str(i)] *= self.reg
+            hidden['dW' + str(i)] += self.reg * self.params['W' + str(i)]
 
         list_dw = {key[1:]: val for key, val in hidden.iteritems() if key[:2] == 'dW'}
         list_db = {key[1:]: val for key, val in hidden.iteritems() if key[:2] == 'db'}
