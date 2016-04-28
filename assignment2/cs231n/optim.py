@@ -89,6 +89,7 @@ def rmsprop(x, dx, config=None):
     decay_rate = config.get('decay_rate', 0.99)
     eps = config.get('epsilon', 1e-8)
     cache = config.get('cache', np.zeros_like(x))
+    dx = dx.reshape(x.shape)
     next_x = x
 
     cache = decay_rate * cache + (1 - decay_rate) * dx ** 2
@@ -122,6 +123,7 @@ def adam(x, dx, config=None):
     m = config.get('m', np.zeros_like(x))
     v = config.get('v', np.zeros_like(x))
     t = config.get('t', 0)
+    dx = dx.reshape(x.shape)
     next_x = x
 
     t += 1
