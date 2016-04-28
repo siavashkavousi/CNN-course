@@ -172,7 +172,7 @@ class FullyConnectedNet(object):
         """
         X = X.astype(self.dtype)
         mode = 'test' if y is None else 'train'
-        hidden, cache = {}, []
+        hidden = {}
         num_layers = self.num_layers
 
         # Set train/test mode for batchnorm params and dropout param since they
@@ -192,9 +192,13 @@ class FullyConnectedNet(object):
             h = hidden['h' + str(idx - 1)]
 
             if idx == num_layers:
-                hidden['h' + str(idx)], cache[idx] = affine_forward(h, w, b)
+                h, cache = affine_forward(h, w, b)
+                hidden['h' + str(idx)] = h
+                hidden['cache' + str(idx)] = cache
             else:
-                hidden['h' + str(idx)], cache[idx] = affine_relu_forward(h, w, b)
+                h, cache = affine_relu_forward(h, w, b)
+                hidden['h' + str(idx)] = h
+                hidden['cache' + str(idx)] = cache
 
         scores = hidden['h' + str(num_layers)]
 
@@ -227,24 +231,27 @@ class FullyConnectedNet(object):
             loss += 0.5 * self.reg * np.sum(w * w)
 
         # Backward pass
+        print num_layers
         hidden['dh' + str(num_layers)] = dout
 
         for i in range(num_layers)[::-1]:
+            print i
             idx = i + 1
             dout = hidden['dh' + str(idx)]
+            dcache = hidden['cache' + str(idx)]
 
             if idx == num_layers:
-                dx, dw, db = affine_backward(dout, cache[idx])
-                hidden['dx' + str(idx - 1)] = dx
+                dh, dw, db = affine_backward(dout, dcache)
+                hidden['dh' + str(idx - 1)] = dh
                 hidden['dw' + str(idx)] = dw
                 hidden['db' + str(idx)] = db
             else:
-                dx, dw, db = affine_relu_backward(dout, cache[idx])
-                hidden['dx' + str(idx - 1)] = dx
+                dh, dw, db = affine_relu_backward(dout, dcache)
+                hidden['dh' + str(idx - 1)] = dh
                 hidden['dw' + str(idx)] = dw
                 hidden['db' + str(idx)] = db
 
-        for i in range(0, self.num_layers):
+        for i in range(self.num_layers):
             hidden['dw' + str(i)] *= self.reg
 
         list_dw = {key[1:]: val for key, val in hidden.iteritems() if key[:2] == 'dW'}
