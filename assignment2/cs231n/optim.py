@@ -83,13 +83,16 @@ def rmsprop(x, dx, config=None):
     - epsilon: Small scalar used for smoothing to avoid dividing by zero.
     - cache: Moving average of second moments of gradients.
     """
-    if config is None: config = {}
-    config.setdefault('learning_rate', 1e-2)
-    config.setdefault('decay_rate', 0.99)
-    config.setdefault('epsilon', 1e-8)
-    config.setdefault('cache', np.zeros_like(x))
+    if config is None:
+        config = {}
+    learning_rate = config.get('learning_rate', 1e-2)
+    decay_rate = config.get('decay_rate', 0.99)
+    eps = config.get('epsilon', 1e-8)
+    cache = config.get('cache', np.zeros_like(x))
+    next_x = x
 
-    next_x = None
+    cache = decay_rate * cache + (1 - decay_rate) * dx ** 2
+    x -= learning_rate * dx / (np.sqrt(cache) + eps)
 
     return next_x, config
 
