@@ -72,7 +72,7 @@ class TwoLayerNet(object):
         if y is None:
             return scores
 
-        loss, dout = softmax_loss(z2, y)
+        loss, dout = softmax_loss(scores, y)
         dx2, dw2, db2 = affine_backward(dout, cache2)
         dx1, dw1, db1 = affine_relu_backward(dx2, cache1)
 
@@ -133,7 +133,7 @@ class FullyConnectedNet(object):
 
         dims = [input_dim] + hidden_dims + [num_classes]
 
-        for i in range(len(dims) - 1):
+        for i in range(self.num_layers):
             self.params['W' + str(i + 1)] = np.random.normal(size=(dims[i], dims[i + 1]), scale=weight_scale)
             self.params['b' + str(i + 1)] = np.zeros(dims[i + 1])
 
@@ -172,6 +172,8 @@ class FullyConnectedNet(object):
         """
         X = X.astype(self.dtype)
         mode = 'test' if y is None else 'train'
+        hidden = {}
+        num_layers = self.num_layers
 
         # Set train/test mode for batchnorm params and dropout param since they
         # behave differently during training and testing.
@@ -181,7 +183,20 @@ class FullyConnectedNet(object):
             for bn_param in self.bn_params:
                 bn_param[mode] = mode
 
-        scores = None
+        a, cache = [], []
+        hidden['h0'] = X
+
+        for i in range(num_layers):
+            idx = i + 1
+            w = self.params['W' + str(idx)]
+            b = self.params['b' + str(idx)]
+            h = hidden['h' + str(idx - 1)]
+
+            if idx == num_layers:
+                scores, cache[idx] = affine_forward(h, w, b)
+            else:
+                hidden['h' + str(i)], cache[idx] = affine_relu_forward(h, w, b)
+
         ############################################################################
         # TODO: Implement the forward pass for the fully-connected net, computing  #
         # the class scores for X and storing them in the scores variable.          #
@@ -204,6 +219,7 @@ class FullyConnectedNet(object):
             return scores
 
         loss, grads = 0.0, {}
+
         ############################################################################
         # TODO: Implement the backward pass for the fully-connected net. Store the #
         # loss in the loss variable and gradients in the grads dictionary. Compute #
