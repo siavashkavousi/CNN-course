@@ -172,7 +172,7 @@ class FullyConnectedNet(object):
         """
         X = X.astype(self.dtype)
         mode = 'test' if y is None else 'train'
-        hidden = {}
+        hidden, cache = {}, []
         num_layers = self.num_layers
 
         # Set train/test mode for batchnorm params and dropout param since they
@@ -183,7 +183,6 @@ class FullyConnectedNet(object):
             for bn_param in self.bn_params:
                 bn_param[mode] = mode
 
-        a, cache = [], []
         hidden['h0'] = X
 
         for i in range(num_layers):
@@ -193,9 +192,11 @@ class FullyConnectedNet(object):
             h = hidden['h' + str(idx - 1)]
 
             if idx == num_layers:
-                scores, cache[idx] = affine_forward(h, w, b)
+                hidden['h' + str(idx)], cache[idx] = affine_forward(h, w, b)
             else:
-                hidden['h' + str(i)], cache[idx] = affine_relu_forward(h, w, b)
+                hidden['h' + str(idx)], cache[idx] = affine_relu_forward(h, w, b)
+
+        scores = hidden['h' + str(num_layers)]
 
         ############################################################################
         # TODO: Implement the forward pass for the fully-connected net, computing  #
@@ -219,6 +220,38 @@ class FullyConnectedNet(object):
             return scores
 
         loss, grads = 0.0, {}
+
+        loss, dout = softmax_loss(scores, y)
+        # Computes loss
+        for w in [self.params[f] for f in self.params.keys() if f[0] == 'W']:
+            loss += 0.5 * self.reg * np.sum(w * w)
+
+        # Backward pass
+        hidden['dh' + str(num_layers)] = dout
+
+        for i in range(num_layers)[::-1]:
+            idx = i + 1
+            dout = hidden['dh' + str(idx)]
+
+            if idx == num_layers:
+                dx, dw, db = affine_backward(dout, cache[idx])
+                hidden['dx' + str(idx - 1)] = dx
+                hidden['dw' + str(idx)] = dw
+                hidden['db' + str(idx)] = db
+            else:
+                dx, dw, db = affine_relu_backward(dout, cache[idx])
+                hidden['dx' + str(idx - 1)] = dx
+                hidden['dw' + str(idx)] = dw
+                hidden['db' + str(idx)] = db
+
+        for i in range(0, self.num_layers):
+            hidden['dw' + str(i)] *= self.reg
+
+        list_dw = {key[1:]: val for key, val in hidden.iteritems() if key[:2] == 'dW'}
+        list_db = {key[1:]: val for key, val in hidden.iteritems() if key[:2] == 'db'}
+
+        grads.update(list_dw)
+        grads.update(list_db)
 
         ############################################################################
         # TODO: Implement the backward pass for the fully-connected net. Store the #
