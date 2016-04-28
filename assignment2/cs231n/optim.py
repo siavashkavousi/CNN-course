@@ -92,7 +92,9 @@ def rmsprop(x, dx, config=None):
     next_x = x
 
     cache = decay_rate * cache + (1 - decay_rate) * dx ** 2
-    x -= learning_rate * dx / (np.sqrt(cache) + eps)
+    next_x -= learning_rate * dx / (np.sqrt(cache) + eps)
+
+    config['cache'] = cache
 
     return next_x, config
 
@@ -111,7 +113,8 @@ def adam(x, dx, config=None):
     - v: Moving average of squared gradient.
     - t: Iteration number.
     """
-    if config is None: config = {}
+    if config is None:
+        config = {}
     learning_rate = config.get('learning_rate', 1e-3)
     beta1 = config.get('beta1', 0.9)
     beta2 = config.get('beta2', 0.999)
@@ -121,8 +124,15 @@ def adam(x, dx, config=None):
     t = config.get('t', 0)
     next_x = x
 
+    t += 1
     m = beta1 * m + (1 - beta1) * dx
     v = beta2 * v + (1 - beta2) * (dx ** 2)
-    x += - learning_rate * m / (np.sqrt(v) + eps)
+    mb = m / (1 - beta1 ** t)
+    vb = v / (1 - beta2 ** t)
+    next_x -= learning_rate * mb / (np.sqrt(vb) + eps)
+
+    config['m'] = m
+    config['v'] = v
+    config['t'] = t
 
     return next_x, config
