@@ -131,22 +131,16 @@ class FullyConnectedNet(object):
         self.dtype = dtype
         self.params = {}
 
-        ############################################################################
-        # TODO: Initialize the parameters of the network, storing all values in    #
-        # the self.params dictionary. Store weights and biases for the first layer #
-        # in W1 and b1; for the second layer use W2 and b2, etc. Weights should be #
-        # initialized from a normal distribution with standard deviation equal to  #
-        # weight_scale and biases should be initialized to zero.                   #
-        #                                                                          #
-        # When using batch normalization, store scale and shift parameters for the #
-        # first layer in gamma1 and beta1; for the second layer use gamma2 and     #
-        # beta2, etc. Scale parameters should be initialized to one and shift      #
-        # parameters should be initialized to zero.                                #
-        ############################################################################
-        pass
-        ############################################################################
-        #                             END OF YOUR CODE                             #
-        ############################################################################
+        dims = [input_dim] + hidden_dims + [num_classes]
+
+        for i in range(len(dims) - 1):
+            self.params['W' + str(i + 1)] = np.random.normal(size=(dims[i], dims[i + 1]), scale=weight_scale)
+            self.params['b' + str(i + 1)] = np.zeros(dims[i + 1])
+
+        # if use_batchnorm:
+        #     for i in range(len(dims) - 1):
+        #         self.params['gamma' + str(i + 1)] = np.ones(dims[i + 1])
+        #         self.params['beta' + str(i + 1)] = np.zeros(dims[i + 1])
 
         # When using dropout we need to pass a dropout_param dictionary to each
         # dropout layer so that the layer knows the dropout probability and the mode
