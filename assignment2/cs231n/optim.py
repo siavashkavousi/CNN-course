@@ -112,23 +112,17 @@ def adam(x, dx, config=None):
     - t: Iteration number.
     """
     if config is None: config = {}
-    config.setdefault('learning_rate', 1e-3)
-    config.setdefault('beta1', 0.9)
-    config.setdefault('beta2', 0.999)
-    config.setdefault('epsilon', 1e-8)
-    config.setdefault('m', np.zeros_like(x))
-    config.setdefault('v', np.zeros_like(x))
-    config.setdefault('t', 0)
+    learning_rate = config.get('learning_rate', 1e-3)
+    beta1 = config.get('beta1', 0.9)
+    beta2 = config.get('beta2', 0.999)
+    eps = config.get('epsilon', 1e-8)
+    m = config.get('m', np.zeros_like(x))
+    v = config.get('v', np.zeros_like(x))
+    t = config.get('t', 0)
+    next_x = x
 
-    next_x = None
-    #############################################################################
-    # TODO: Implement the Adam update formula, storing the next value of x in   #
-    # the next_x variable. Don't forget to update the m, v, and t variables     #
-    # stored in config.                                                         #
-    #############################################################################
-    pass
-    #############################################################################
-    #                             END OF YOUR CODE                              #
-    #############################################################################
+    m = beta1 * m + (1 - beta1) * dx
+    v = beta2 * v + (1 - beta2) * (dx ** 2)
+    x += - learning_rate * m / (np.sqrt(v) + eps)
 
     return next_x, config
