@@ -64,17 +64,17 @@ class TwoLayerNet(object):
         w1, b1 = self.params['W1'], self.params['b1']
         w2, b2 = self.params['W2'], self.params['b2']
 
-        a1, cache1 = affine_relu_forward(X, w1, b1)
-        z2, cache2 = affine_forward(a1, w2, b2)
-        scores = z2
+        h1, cache1 = affine_relu_forward(X, w1, b1)
+        h2, cache2 = affine_forward(h1, w2, b2)
+        scores = h2
 
         # If y is None then we are in test mode so just return scores
         if y is None:
             return scores
 
         loss, dout = softmax_loss(scores, y)
-        dx2, dw2, db2 = affine_backward(dout, cache2)
-        dx1, dw1, db1 = affine_relu_backward(dx2, cache1)
+        dh2, dw2, db2 = affine_backward(dout, cache2)
+        dh1, dw1, db1 = affine_relu_backward(dh2, cache1)
 
         dw1 += self.reg * w1
         dw2 += self.reg * w2
@@ -183,6 +183,7 @@ class FullyConnectedNet(object):
             for bn_param in self.bn_params:
                 bn_param[mode] = mode
 
+        # Forward pass
         hidden['h0'] = X
 
         for i in range(num_layers):
@@ -231,11 +232,9 @@ class FullyConnectedNet(object):
             loss += 0.5 * self.reg * np.sum(w * w)
 
         # Backward pass
-        print num_layers
         hidden['dh' + str(num_layers)] = dout
 
         for i in range(num_layers)[::-1]:
-            print i
             idx = i + 1
             dout = hidden['dh' + str(idx)]
             dcache = hidden['cache' + str(idx)]
@@ -251,7 +250,7 @@ class FullyConnectedNet(object):
                 hidden['dw' + str(idx)] = dw
                 hidden['db' + str(idx)] = db
 
-        for i in range(self.num_layers):
+        for i in range(1, self.num_layers):
             hidden['dw' + str(i)] *= self.reg
 
         list_dw = {key[1:]: val for key, val in hidden.iteritems() if key[:2] == 'dW'}
