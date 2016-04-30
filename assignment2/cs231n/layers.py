@@ -283,13 +283,7 @@ def dropout_backward(dout, cache):
 
     dx = None
     if mode == 'train':
-        ###########################################################################
-        # TODO: Implement the training phase backward pass for inverted dropout.  #
-        ###########################################################################
-        pass
-        ###########################################################################
-        #                            END OF YOUR CODE                             #
-        ###########################################################################
+        dx = dout * mask
     elif mode == 'test':
         dx = dout
     return dx
