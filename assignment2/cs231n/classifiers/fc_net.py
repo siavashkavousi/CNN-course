@@ -185,12 +185,19 @@ class FullyConnectedNet(object):
 
         # Forward pass
         hidden['h0'] = X
+        # Performs dropout on input layer
+        if self.use_dropout:
+            h, cache = dropout_forward(X, self.dropout_param)
+            hidden['h_dropout0'] = h
+            hidden['cache_dropout0'] = cache
 
         for i in range(num_layers):
             idx = i + 1
             w = self.params['W' + str(idx)]
             b = self.params['b' + str(idx)]
             h = hidden['h' + str(idx - 1)]
+            if self.use_dropout:
+                h = hidden['h_dropout' + str(idx - 1)]
 
             if idx == num_layers:
                 h, cache = affine_forward(h, w, b)
@@ -200,6 +207,13 @@ class FullyConnectedNet(object):
                 h, cache = affine_relu_forward(h, w, b)
                 hidden['h' + str(idx)] = h
                 hidden['cache' + str(idx)] = cache
+
+                if self.use_dropout:
+                    # Performs dropout on the current layer
+                    h = hidden['h' + str(idx)]
+                    h, cache = dropout_forward(h, self.dropout_param)
+                    hidden['h_dropout' + str(idx)] = h
+                    hidden['cache_dropout' + str(idx)] = cache
 
         scores = hidden['h' + str(num_layers)]
 
@@ -237,15 +251,19 @@ class FullyConnectedNet(object):
         for i in range(num_layers)[::-1]:
             idx = i + 1
             dout = hidden['dh' + str(idx)]
-            dcache = hidden['cache' + str(idx)]
+            out_cache = hidden['cache' + str(idx)]
 
             if idx == num_layers:
-                dh, dw, db = affine_backward(dout, dcache)
+                dh, dw, db = affine_backward(dout, out_cache)
                 hidden['dh' + str(idx - 1)] = dh
                 hidden['dW' + str(idx)] = dw
                 hidden['db' + str(idx)] = db
             else:
-                dh, dw, db = affine_relu_backward(dout, dcache)
+                if self.use_dropout:
+                    out_cache_dropout = hidden['cache_dropout' + str(idx)]
+                    dout = dropout_backward(dout, out_cache_dropout)
+
+                dh, dw, db = affine_relu_backward(dout, out_cache)
                 hidden['dh' + str(idx - 1)] = dh
                 hidden['dW' + str(idx)] = dw
                 hidden['db' + str(idx)] = db
