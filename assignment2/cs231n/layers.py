@@ -289,7 +289,7 @@ def dropout_backward(dout, cache):
     return dx
 
 
-def conv_forward_naive(x, w, b, conv_param):
+def conv_forward_naive(x, W, b, conv_param):
     """
     A naive implementation of the forward pass for a convolutional layer.
 
@@ -312,40 +312,23 @@ def conv_forward_naive(x, w, b, conv_param):
       W' = 1 + (W + 2 * pad - WW) / stride
     - cache: (x, w, b, conv_param)
     """
-    out = None
-    #############################################################################
-    # TODO: Implement the convolutional forward pass.                           #
-    # Hint: you can use the function np.pad for padding.                        #
-    #############################################################################
+    num_train, c, h, w = x.shape
+    f, cc, hh, ww = W.shape
+    p = conv_param['pad']
+    s = conv_param['stride']
+    # Calculates width and height of output
+    w_nn = 1 + (w - ww + 2 * p) / s
+    h_nn = 1 + (h - hh + 2 * p) / s
+    # Adds zero padding to input
+    x = np.pad(x, ((0, 0), (0, 0), (p, p), (p, p)), 'constant')
 
-    N, C, H, W = x.shape
-    F, C, HH, WW = w.shape
-    F = b.shape[0]
-    P = conv_param["pad"]
-    S = conv_param["stride"]
-    H_R = 1 + (H + 2 * P - HH) / S
-    W_R = 1 + (W + 2 * P - WW) / S
+    out = np.zeros((num_train, f, h_nn, w_nn))
+    for n in xrange(num_train):  # number of training examples
+        for depth in xrange(f):  # number of filters
+            for i in xrange(0, h, s):  # height
+                for j in xrange(0, w, s):  # width
+                    out[n, depth, i / s, j / s] = np.sum(x[n, :, i:i + hh, j:j + ww] * W[depth]) + b[depth]
 
-    # print "W,F,P,S,H_R,W_R: ",W,F,P,S,H_R,W_R
-
-    x_pad = np.lib.pad(x, ((0, 0), (0, 0), (P, P), (P, P)), 'constant', constant_values=0)
-    # print "x.shape: "+str(x.shape)
-    # print "w.shape: "+str(w.shape)
-    # print "x_pad.shape: "+str(x_pad.shape)
-
-    out = np.zeros((N, F, H_R, W_R))
-    # print "out.shape: "+str(out.shape)
-    for n in xrange(N):  # data
-        for depth in xrange(F):  # depth
-            for r in xrange(0, H, S):  # row
-                for c in xrange(0, W, S):  # column
-                    # print "=====x_pad====="+"("+str(r)+":"+str(r+HH)+","+str(c)+":"+str(c+WW)+")"
-                    # print "filling out[n,depth,hr,wr]",n,depth,hr,wr
-                    out[n, depth, r / S, c / S] = np.sum(x_pad[n, :, r:r + HH, c:c + WW] * w[depth, :, :, :]) + b[depth]
-
-    #############################################################################
-    #                             END OF YOUR CODE                              #
-    #############################################################################
     cache = (x, w, b, conv_param)
     return out, cache
 
