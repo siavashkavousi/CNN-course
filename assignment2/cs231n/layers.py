@@ -321,14 +321,14 @@ def conv_forward_naive(x, W, b, conv_param):
     w_nn = 1 + (w - ww + 2 * p) / s
     h_nn = 1 + (h - hh + 2 * p) / s
     # Adds zero padding to input
-    x = np.pad(x, ((0, 0), (0, 0), (p, p), (p, p)), 'constant')
+    x_pad = np.pad(x, ((0, 0), (0, 0), (p, p), (p, p)), 'constant')
     out = np.zeros((num_train, f, h_nn, w_nn))
 
     for n in xrange(num_train):  # number of training examples
         for depth in xrange(f):  # number of filters
             for i in xrange(0, h, s):  # height
                 for j in xrange(0, w, s):  # width
-                    out[n, depth, i / s, j / s] = np.sum(x[n, :, i:i + hh, j:j + ww] * W[depth]) + b[depth]
+                    out[n, depth, i / s, j / s] = np.sum(x_pad[n, :, i:i + hh, j:j + ww] * W[depth]) + b[depth]
 
     cache = (x, W, b, conv_param)
     return out, cache
@@ -348,24 +348,36 @@ def conv_backward_naive(dout, cache):
     - db: Gradient with respect to b
     """
     x, W, b, conv_param = cache
+    _, _, h_nn, w_nn = dout.shape
     num_train, c, h, w = x.shape
     f, cc, hh, ww = W.shape
     p = conv_param['pad']
     s = conv_param['stride']
-    dx, dw, db = np.zeros(x.shape), np.zeros(W.shape), np.zeros(b.shape)
+    x_pad = np.pad(x, ((0, 0), (0, 0), (p, p), (p, p)), 'constant')
+    dx, dw, db = np.zeros(x_pad.shape), np.zeros(W.shape), np.zeros(b.shape)
 
+    # Calculates dx
     for n in xrange(num_train):  # number of training examples
         for depth in xrange(f):  # number of filters
             for i in xrange(0, h, s):  # height
                 for j in xrange(0, w, s):  # width
                     dx[n, :, i:i + hh, j:j + ww] += W[depth] * dout[n, depth, i / s, j / s]
-                    dw[depth] += dx[n, :, i:i + hh, j:j + ww] * dout[n, depth, i / s, j / s]
 
     # Deletes padding
     deleted_rows = range(p) + range(h + p, h + 2 * p)
     deleted_cols = range(p) + range(w + p, w + 2 * p)
     dx = np.delete(dx, deleted_rows, axis=2)
     dx = np.delete(dx, deleted_cols, axis=3)
+
+    # Calculates dw
+    for n in xrange(num_train):  # number of training examples
+        for depth in xrange(f):  # number of filters
+            for i in xrange(0, h_nn, s):  # height
+                for j in xrange(0, w_nn, s):  # width
+                    dw[depth] += x_pad[n, :, i*s:i*s + hh, j*s:j*s + ww] * dout[n, depth, i, j]
+
+    for depth in range(f):
+        db[depth] = np.sum(dout[:, depth])
 
     return dx, dw, db
 
