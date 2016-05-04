@@ -313,21 +313,36 @@ def conv_forward_naive(x, w, b, conv_param):
     - cache: (x, w, b, conv_param)
     """
     out = None
-    num_train, c, h, w = x.shape
-    f, cc, hh, ww = w.shape
-    p = conv_param['pad']
-    s = conv_param['stride']
-    width_num_neuron = 1 + (w - f + 2 * p) / s
-    height_num_neuron = 1 + (h - f + 2 * p) / s
-
-    # for i in num_train:
-    #     for j in num_neuron:
-
     #############################################################################
     # TODO: Implement the convolutional forward pass.                           #
     # Hint: you can use the function np.pad for padding.                        #
     #############################################################################
-    pass
+
+    N, C, H, W = x.shape
+    F, C, HH, WW = w.shape
+    F = b.shape[0]
+    P = conv_param["pad"]
+    S = conv_param["stride"]
+    H_R = 1 + (H + 2 * P - HH) / S
+    W_R = 1 + (W + 2 * P - WW) / S
+
+    # print "W,F,P,S,H_R,W_R: ",W,F,P,S,H_R,W_R
+
+    x_pad = np.lib.pad(x, ((0, 0), (0, 0), (P, P), (P, P)), 'constant', constant_values=0)
+    # print "x.shape: "+str(x.shape)
+    # print "w.shape: "+str(w.shape)
+    # print "x_pad.shape: "+str(x_pad.shape)
+
+    out = np.zeros((N, F, H_R, W_R))
+    # print "out.shape: "+str(out.shape)
+    for n in xrange(N):  # data
+        for depth in xrange(F):  # depth
+            for r in xrange(0, H, S):  # row
+                for c in xrange(0, W, S):  # column
+                    # print "=====x_pad====="+"("+str(r)+":"+str(r+HH)+","+str(c)+":"+str(c+WW)+")"
+                    # print "filling out[n,depth,hr,wr]",n,depth,hr,wr
+                    out[n, depth, r / S, c / S] = np.sum(x_pad[n, :, r:r + HH, c:c + WW] * w[depth, :, :, :]) + b[depth]
+
     #############################################################################
     #                             END OF YOUR CODE                              #
     #############################################################################
