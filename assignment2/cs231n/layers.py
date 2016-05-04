@@ -314,6 +314,7 @@ def conv_forward_naive(x, W, b, conv_param):
     """
     num_train, c, h, w = x.shape
     f, cc, hh, ww = W.shape
+    assert c == cc, 'channels doesn\'t match'
     p = conv_param['pad']
     s = conv_param['stride']
     # Calculates width and height of output
@@ -329,7 +330,7 @@ def conv_forward_naive(x, W, b, conv_param):
                 for j in xrange(0, w, s):  # width
                     out[n, depth, i / s, j / s] = np.sum(x[n, :, i:i + hh, j:j + ww] * W[depth]) + b[depth]
 
-    cache = (x, w, b, conv_param)
+    cache = (x, W, b, conv_param)
     return out, cache
 
 
