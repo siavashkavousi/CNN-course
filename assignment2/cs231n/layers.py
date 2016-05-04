@@ -322,8 +322,8 @@ def conv_forward_naive(x, W, b, conv_param):
     h_nn = 1 + (h - hh + 2 * p) / s
     # Adds zero padding to input
     x = np.pad(x, ((0, 0), (0, 0), (p, p), (p, p)), 'constant')
-
     out = np.zeros((num_train, f, h_nn, w_nn))
+
     for n in xrange(num_train):  # number of training examples
         for depth in xrange(f):  # number of filters
             for i in xrange(0, h, s):  # height
@@ -347,14 +347,26 @@ def conv_backward_naive(dout, cache):
     - dw: Gradient with respect to w
     - db: Gradient with respect to b
     """
-    dx, dw, db = None, None, None
-    #############################################################################
-    # TODO: Implement the convolutional backward pass.                          #
-    #############################################################################
-    pass
-    #############################################################################
-    #                             END OF YOUR CODE                              #
-    #############################################################################
+    x, W, b, conv_param = cache
+    num_train, c, h, w = x.shape
+    f, cc, hh, ww = W.shape
+    p = conv_param['pad']
+    s = conv_param['stride']
+    dx, dw, db = np.zeros(x.shape), np.zeros(W.shape), np.zeros(b.shape)
+
+    for n in xrange(num_train):  # number of training examples
+        for depth in xrange(f):  # number of filters
+            for i in xrange(0, h, s):  # height
+                for j in xrange(0, w, s):  # width
+                    dx[n, :, i:i + hh, j:j + ww] += W[depth] * dout[n, depth, i / s, j / s]
+                    dw[depth] += dx[n, :, i:i + hh, j:j + ww] * dout[n, depth, i / s, j / s]
+
+    # Deletes padding
+    deleted_rows = range(p) + range(h + p, h + 2 * p)
+    deleted_cols = range(p) + range(w + p, w + 2 * p)
+    dx = np.delete(dx, deleted_rows, axis=2)
+    dx = np.delete(dx, deleted_cols, axis=3)
+
     return dx, dw, db
 
 
