@@ -37,6 +37,15 @@ class ThreeLayerConvNet(object):
         self.reg = reg
         self.dtype = dtype
 
+        # Conv relu layer
+        # Input size: (num_train, channels, height, width)
+        # Weight size: (num_filters, channels, filter_size, filter_size)
+        # Bias size: (num_filters)
+        channels, height, width = input_dim
+        # Initializes weights and biases
+        self.params['W1'] = np.random.normal(size=(num_filters, channels, filter_size, filter_size), scale=weight_scale)
+        self.params['b1'] = np.zeros(num_filters)
+
         ############################################################################
         # TODO: Initialize weights and biases for the three-layer convolutional    #
         # network. Weights should be initialized from a Gaussian with standard     #
