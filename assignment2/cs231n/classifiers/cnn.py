@@ -76,21 +76,6 @@ class ThreeLayerConvNet(object):
         self.params['W3'] = np.random.normal(size=(hidden_dim, num_classes), scale=weight_scale)
         self.params['b3'] = np.zeros(num_classes)
 
-        ############################################################################
-        # TODO: Initialize weights and biases for the three-layer convolutional    #
-        # network. Weights should be initialized from a Gaussian with standard     #
-        # deviation equal to weight_scale; biases should be initialized to zero.   #
-        # All weights and biases should be stored in the dictionary self.params.   #
-        # Store weights and biases for the convolutional layer using the keys 'W1' #
-        # and 'b1'; use keys 'W2' and 'b2' for the weights and biases of the       #
-        # hidden affine layer, and keys 'W3' and 'b3' for the weights and biases   #
-        # of the output affine layer.                                              #
-        ############################################################################
-        pass
-        ############################################################################
-        #                             END OF YOUR CODE                             #
-        ############################################################################
-
         for k, v in self.params.iteritems():
             self.params[k] = v.astype(dtype)
 
