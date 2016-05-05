@@ -65,7 +65,7 @@ class ThreeLayerConvNet(object):
         # Weights size: (num_filters * h_p * w_p, hidden_dim)
         # Biases size: (hidden_dim)
         # Output size: (num_train, hidden_dim)
-        self.params['W2'] = np.random.normal(size=(num_filters*h_p*w_p, hidden_dim), scale=weight_scale)
+        self.params['W2'] = np.random.normal(size=(num_filters * h_p * w_p, hidden_dim), scale=weight_scale)
         self.params['b2'] = np.zeros(hidden_dim)
 
         # Affine Layer
@@ -92,11 +92,15 @@ class ThreeLayerConvNet(object):
         # pass conv_param to the forward pass for the convolutional layer
         filter_size = W1.shape[2]
         conv_param = {'stride': 1, 'pad': (filter_size - 1) / 2}
-
         # pass pool_param to the forward pass for the max-pooling layer
         pool_param = {'pool_height': 2, 'pool_width': 2, 'stride': 2}
+        hidden = {}
 
-        scores = None
+        out1, hidden['cache1'] = conv_relu_pool_forward(X, W1, b1, conv_param, pool_param)
+        out2, hidden['cache2'] = affine_relu_forward(out1, W2, b2)
+        out3, hidden['cache3'] = affine_forward(out2, W3, b3)
+        softmax_loss(out3, y)
+
         ############################################################################
         # TODO: Implement the forward pass for the three-layer convolutional net,  #
         # computing the class scores for X and storing them in the scores          #
