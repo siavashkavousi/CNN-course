@@ -99,34 +99,21 @@ class ThreeLayerConvNet(object):
         out1, hidden['cache1'] = conv_relu_pool_forward(X, W1, b1, conv_param, pool_param)
         out2, hidden['cache2'] = affine_relu_forward(out1, W2, b2)
         out3, hidden['cache3'] = affine_forward(out2, W3, b3)
-        softmax_loss(out3, y)
-
-        ############################################################################
-        # TODO: Implement the forward pass for the three-layer convolutional net,  #
-        # computing the class scores for X and storing them in the scores          #
-        # variable.                                                                #
-        ############################################################################
-        pass
-        ############################################################################
-        #                             END OF YOUR CODE                             #
-        ############################################################################
+        scores = out3
 
         if y is None:
             return scores
 
         loss, grads = 0, {}
-        ############################################################################
-        # TODO: Implement the backward pass for the three-layer convolutional net, #
-        # storing the loss and gradients in the loss and grads variables. Compute  #
-        # data loss using softmax, and make sure that grads[k] holds the gradients #
-        # for self.params[k]. Don't forget to add L2 regularization!               #
-        ############################################################################
-        pass
-        ############################################################################
-        #                             END OF YOUR CODE                             #
-        ############################################################################
+        loss, dout = softmax_loss(scores, y)
+        loss += 0.5 * self.reg * (np.sum(W1 * W1) + np.sum(W2 * W2) + np.sum(W3 * W3))
+
+        dout3, grads['W3'], grads['b3'] = affine_backward(dout, hidden['cache3'])
+        dout2, grads['W2'], grads['b2'] = affine_relu_backward(dout3, hidden['cache2'])
+        dout1, grads['W1'], grads['b1'] = conv_relu_pool_backward(dout2, hidden['cache1'])
+
+        grads['W1'] += self.reg * W1
+        grads['W2'] += self.reg * W2
+        grads['W3'] += self.reg * W3
 
         return loss, grads
-
-
-pass
