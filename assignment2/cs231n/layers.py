@@ -374,7 +374,7 @@ def conv_backward_naive(dout, cache):
         for depth in xrange(f):  # number of filters
             for i in xrange(0, h_nn, s):  # height
                 for j in xrange(0, w_nn, s):  # width
-                    dw[depth] += x_pad[n, :, i*s:i*s + hh, j*s:j*s + ww] * dout[n, depth, i, j]
+                    dw[depth] += x_pad[n, :, i * s:i * s + hh, j * s:j * s + ww] * dout[n, depth, i, j]
 
     for depth in range(f):
         db[depth] = np.sum(dout[:, depth])
@@ -397,14 +397,20 @@ def max_pool_forward_naive(x, pool_param):
     - out: Output data
     - cache: (x, pool_param)
     """
-    out = None
-    #############################################################################
-    # TODO: Implement the max pooling forward pass                              #
-    #############################################################################
-    pass
-    #############################################################################
-    #                             END OF YOUR CODE                              #
-    #############################################################################
+    num_train, channels, height, width = x.shape
+    pool_height = pool_param['pool_height']
+    pool_width = pool_param['pool_width']
+    s = pool_param['stride']
+    w_nn = 1 + (width - pool_width) / s
+    h_nn = 1 + (height - pool_width) / s
+    out = np.zeros((num_train, channels, h_nn, w_nn))
+
+    for n in xrange(num_train):
+        for c in xrange(channels):
+            for h in xrange(h_nn):
+                for w in xrange(w_nn):
+                    out[n, c, h, w] = np.max(x[n, c, h * s:h * s + pool_height, w * s:w * s + pool_width])
+
     cache = (x, pool_param)
     return out, cache
 
