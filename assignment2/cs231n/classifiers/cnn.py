@@ -39,9 +39,9 @@ class ThreeLayerConvNet(object):
 
         # Conv relu layer
         # Input size: (num_train, channels, height, width)
-        # Weight size: (num_filters, channels, filter_size, filter_size)
-        # Bias size: (num_filters)
-        # Output size: (num_train, channels, h_nn, w_nn)
+        # Weights size: (num_filters, channels, filter_size, filter_size)
+        # Biases size: (num_filters)
+        # Output size: (num_train, num_filters, h_nn, w_nn)
         channels, height, width = input_dim
         s = 1
         p = (filter_size - 1) / 2
@@ -52,13 +52,29 @@ class ThreeLayerConvNet(object):
         self.params['b1'] = np.zeros(num_filters)
 
         # Max pooling layer
-        # Input size: (num_train, channels, h_nn, w_nn)
-        # Output size: (num_train, channels, h_p, w_p)
+        # Input size: (num_train, num_filters, h_nn, w_nn)
+        # Output size: (num_train, num_filters, h_p, w_p)
         pool_width = 2
         pool_height = 2
         pool_stride = 2
         h_p = 1 + (h_nn - pool_height) / pool_stride
         w_p = 1 + (w_nn - pool_width) / pool_stride
+
+        # Affine layer (FC layer)
+        # Input size: (num_train, num_filters, h_p, w_p)
+        # Weights size: (num_filters * h_p * w_p, hidden_dim)
+        # Biases size: (hidden_dim)
+        # Output size: (num_train, hidden_dim)
+        self.params['W2'] = np.random.normal(size=(num_filters*h_p*w_p, hidden_dim), scale=weight_scale)
+        self.params['b2'] = np.zeros(hidden_dim)
+
+        # Affine Layer
+        # Input size: (num_train, hidden_dim)
+        # Weights size: (hidden_dim, num_classes)
+        # Biases size: (num_classes)
+        # Output size: (num_train, num_classes)
+        self.params['W3'] = np.random.normal(size=(hidden_dim, num_classes), scale=weight_scale)
+        self.params['b3'] = np.zeros(num_classes)
 
         ############################################################################
         # TODO: Initialize weights and biases for the three-layer convolutional    #
