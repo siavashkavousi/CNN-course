@@ -401,14 +401,14 @@ def max_pool_forward_naive(x, pool_param):
     pool_height = pool_param['pool_height']
     pool_width = pool_param['pool_width']
     s = pool_param['stride']
-    w_nn = 1 + (width - pool_width) / s
-    h_nn = 1 + (height - pool_width) / s
-    out = np.zeros((num_train, channels, h_nn, w_nn))
+    w_p = 1 + (width - pool_width) / s
+    h_p = 1 + (height - pool_height) / s
+    out = np.zeros((num_train, channels, h_p, w_p))
 
     for n in xrange(num_train):
         for c in xrange(channels):
-            for h in xrange(h_nn):
-                for w in xrange(w_nn):
+            for h in xrange(h_p):
+                for w in xrange(w_p):
                     out[n, c, h, w] = np.max(x[n, c, h * s:h * s + pool_height, w * s:w * s + pool_width])
 
     cache = (x, pool_param)
