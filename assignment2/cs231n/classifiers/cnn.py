@@ -41,10 +41,24 @@ class ThreeLayerConvNet(object):
         # Input size: (num_train, channels, height, width)
         # Weight size: (num_filters, channels, filter_size, filter_size)
         # Bias size: (num_filters)
+        # Output size: (num_train, channels, h_nn, w_nn)
         channels, height, width = input_dim
+        s = 1
+        p = (filter_size - 1) / 2
+        h_nn = 1 + (height - filter_size + 2 * p) / s
+        w_nn = 1 + (width - filter_size + 2 * p) / s
         # Initializes weights and biases
         self.params['W1'] = np.random.normal(size=(num_filters, channels, filter_size, filter_size), scale=weight_scale)
         self.params['b1'] = np.zeros(num_filters)
+
+        # Max pooling layer
+        # Input size: (num_train, channels, h_nn, w_nn)
+        # Output size: (num_train, channels, h_p, w_p)
+        pool_width = 2
+        pool_height = 2
+        pool_stride = 2
+        h_p = 1 + (h_nn - pool_height) / pool_stride
+        w_p = 1 + (w_nn - pool_width) / pool_stride
 
         ############################################################################
         # TODO: Initialize weights and biases for the three-layer convolutional    #
