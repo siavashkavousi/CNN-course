@@ -434,7 +434,7 @@ def max_pool_backward_naive(dout, cache):
     w_nn = 1 + (width - pool_width) / s
     h_nn = 1 + (height - pool_width) / s
     dx = np.zeros(x.shape)
-    # (N, C, H, W)
+
     for n in xrange(num_train):
         for c in xrange(channels):
             for h in xrange(h_nn):
